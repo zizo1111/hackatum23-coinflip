@@ -28,6 +28,10 @@ As a part of the hackathon, you are also required to devise a method to measure 
 
 ## Prepaired Tools, Snippets and Tutorials
 
+### Install requirements
+
+First, install with the python interpreter of your choice the "requirements.txt" file via pip, i.e. "pip install requirements.txt"
+
 ### Streamlit as possible frontend
 
 Inside the "streamlit" folder, you will find Python code snippets to help you develop a frontend for your hackathon project with Streamlit. Streamlit is a powerful tool that allows you to turn data scripts into shareable web apps in just a few minutes.
