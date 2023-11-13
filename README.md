@@ -26,10 +26,12 @@ The solution should be efficient, scalable, and robust, capable of handling log 
 ### Measurement of Success:
 As a part of the hackathon, you are also required to devise a method to measure the success of your solution. This could be based on the accuracy of the summarization, the relevance of the answers provided by the QA transformer, and the effectiveness of the traceability feature.
 
-## Streamlit as possible frontend
+## Prepaired Tools, Snippets and Tutorials
+
+### Streamlit as possible frontend
 
 Inside the "streamlit" folder, you will find Python code snippets to help you develop a frontend for your hackathon project with Streamlit. Streamlit is a powerful tool that allows you to turn data scripts into shareable web apps in just a few minutes.
 
-## Tutorial to NLP and Log files
+### Tutorial to NLP and Log files
 
 Inside the ‘tutorial’ folder, you will find some snippets and explanations related to the hackathon and NLP tools that might be useful. These tutorials are designed to help you understand the basics of Natural Language Processing (NLP) and how to work with log files.
