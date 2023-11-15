@@ -8,7 +8,7 @@ In today's data-driven world, handling and understanding large log files is a si
 Furthermore, by linking the answers back to the original log lines, we aim to maintain data credibility and provide a verification method. This hackathon is an opportunity to contribute to a solution that can revolutionize how organizations interact with their log data, leading to more efficient data handling and informed decision-making.
 
 ## Virtual Machine for Hackathon Teams
-To support all hackathon teams, we will provide a Virtual Machine (VM) that is enabled with a GPU. This VM will also have the capability to broadcast a frontend application, such as Streamlit, which will allow teams to present their results effectively. This setup will ensure that all teams have the necessary computational resources and presentation tools to excel in the hackathon.
+To support all hackathon teams, we will provide a Virtual Machine (VM) that is enabled with a GPU. This VM will also have the capability to broadcast a frontend application (see README.md inside "streamlit" folder), such as Streamlit, which will allow teams to present their results effectively. This setup will ensure that all teams have the necessary computational resources and presentation tools to excel in the hackathon.
  
 ## Task Description:
 In this hackathon challenge, your task is to develop a two-step solution using transformer models for handling large log files.
