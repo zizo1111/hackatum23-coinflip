@@ -2,3 +2,6 @@ transformers
 streamlit
 pillow
 plotly
+jupyter
+# check correct version of torch
+torch
