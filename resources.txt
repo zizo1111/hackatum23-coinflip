@@ -1,0 +1,35 @@
+general links:
+https://www.width.ai/post/4-long-text-summarization-methods
+
+
+thread on huggingface on summarization:
+https://discuss.huggingface.co/t/summarization-on-long-documents/920/55?page=3
+
+Some useful methods:
+https://github.com/sahilichake/Document-Summarization-App-using-LLM
+https://github.com/huggingface/notebooks/blob/main/examples/summarization.ipynb
+https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/flan-t5-samsum-summarization.ipynb
+https://github.com/pszemraj/textsum
+https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/deepseed-flan-t5-summarization.ipynb
+
+a SOTA method that i found:
+https://github.com/abertsch72/unlimiformer
+
+
+Things that have to be done:
+
+*   get credentials for the server
+*   setup the environment on the server
+*   read the links and the provided tutorial for a general idea what has to be done
+    *  The model is too big to fit on my laptop, so i have to use the server
+    * The first step is a simple approach that does not work that good, but then they showed
+    a more complex approach that works better including chuncking and summarizing the chunks.
+    * Differtiatior with competition: 
+        * we should try to implement the stuff written in the end of the notebook a much as possible
+        (check the last cell)
+        * we should diffinetly try to finetune a model and look into the vectorization of the text
+
+
+*   Complete the sota research
+*   WE HAVE TO IMPLEMENT A FRONTEND using streamlit as mentioned, I would like to work 
+on that part to the implementation part
