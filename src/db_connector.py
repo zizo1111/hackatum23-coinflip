@@ -50,9 +50,12 @@ class DBConnector:
         
         return columns
 
-    def query_col(self, column_name, table_name='logs'):
+    def query_col(self, column_name, table_name='logs', get_index = False):
         # SQL query to fetch all entries from the 'message' column in the 'logs' table
-        query = f"SELECT {column_name} FROM {table_name}"
+        if(get_index):
+            query = f"SELECT ROWID,{column_name} FROM {table_name}"
+        else:
+            query = f"SELECT {column_name} FROM {table_name}"
 
         # Execute the query
         self.cursor.execute(query)
@@ -62,3 +65,4 @@ class DBConnector:
 
         return cols
 
+    

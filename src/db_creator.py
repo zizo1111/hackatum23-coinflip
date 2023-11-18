@@ -5,8 +5,9 @@ import os
 import pandas as pd
 
 class DBCreator:
-    def __init__(self) -> None:
+    def __init__(self, flag_text=None) -> None:
         self.conn=None
+        self.flag_text = flag_text
 
     def __del__(self):
         if self.conn:
@@ -18,6 +19,7 @@ class DBCreator:
         perm_cls =False
         ssh_cls = False
         other_cls = True
+        keep_flag = True
         # other_cls = False
         line = line.lower()
         # print(line)
@@ -35,8 +37,10 @@ class DBCreator:
         if('ssh' in msg):
             ssh_cls = True
             other_cls = False
+        if(self.flag_text and self.flag_text in msg):
+            keep_flag = False
         
-        return ts,rsc,msg,error_cls,warning_cls,ssh_cls,other_cls
+        return ts,rsc,msg,error_cls,warning_cls,ssh_cls,other_cls,keep_flag
 
 
     def create_db(self, file_name):
@@ -54,18 +58,19 @@ class DBCreator:
                 error_cls BOOLEAN,
                 warning_cls BOOLEAN,
                 ssh_cls BOOLEAN,
-                other_cls BOOLEAN
+                other_cls BOOLEAN,
+                keep_flag BOOLEAN
             )
         ''')
-    # Function to parse a log line
-    def parse_log_line(self, line):
-        match = re.match(r'(\w+\s\d+\s\d+:\d+:\d+)\s([\w\-]+)\s([\w\-]+):\s(.+)', line)
-        if match:
-            date_str, _, source, message = match.groups()
-            date = datetime.strptime(date_str, '%b %d %H:%M:%S').date()
-            time = datetime.strptime(date_str, '%b %d %H:%M:%S').time()
-            return str(date), str(time), source, message
-        return None
+    # # Function to parse a log line
+    # def parse_log_line(self, line):
+    #     match = re.match(r'(\w+\s\d+\s\d+:\d+:\d+)\s([\w\-]+)\s([\w\-]+):\s(.+)', line)
+    #     if match:
+    #         date_str, _, source, message = match.groups()
+    #         date = datetime.strptime(date_str, '%b %d %H:%M:%S').date()
+    #         time = datetime.strptime(date_str, '%b %d %H:%M:%S').time()
+    #         return str(date), str(time), source, message
+    #     return None
     
     def run(self, file_path):
         # get file name
@@ -82,7 +87,7 @@ class DBCreator:
                 if parsed_line:
                     line_ctr+=1
                     # print(parsed_line)
-                    self.cursor.execute('INSERT INTO logs (timestamp, resource, message, error_cls,warning_cls,ssh_cls,other_cls) VALUES (?, ?, ?, ?, ?, ?, ?)', parsed_line)
+                    self.cursor.execute('INSERT INTO logs (timestamp, resource, message, error_cls,warning_cls,ssh_cls,other_cls,keep_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', parsed_line)
         print(line_ctr)
         self.conn.commit()
 
