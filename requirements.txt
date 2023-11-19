@@ -5,3 +5,5 @@ plotly
 jupyter
 # check correct version of torch
 torch
+qdrant_client
+sentence_transformers

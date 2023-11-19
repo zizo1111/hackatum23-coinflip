@@ -2,20 +2,20 @@ import streamlit as st
 from PIL import Image
 import os
 import time
+import sys
+parent_dir = os.path.dirname(os.path.realpath("src"))
+sys.path.append(parent_dir)
+from src import qdrant
+
 
 st.title("CoinFlip Log Analyser")
 
-### XXX  Load the vetor database Qdrant in memory
+### XXX  Load the vector database Qdrant in memory
 
 with st.spinner("Initilaizing in-memory Qdrant vector database for the session"):
-    from sentence_transformers import SentenceTransformer
-    from qdrant_client import QdrantClient, models
-    from qdrant_client.models import PointStruct
-    client  = QdrantClient(":memory:")
-    client.create_collection("my_collection", vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )
-    st.session_state["client"] = client
-    st.session_state["model"] = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
+    qdrantt = qdrant.Qdrant()
+    st.session_state["client"] = qdrantt.client
+    st.session_state["model"] = qdrantt.model
 
 st.sidebar.success("Database and model loaded in memory")
 st.write("Qdrant Database initiliaized in memory")
@@ -26,6 +26,7 @@ if uploaded_file is not None and "file" not in st.session_state:
     st.session_state["file"] = uploaded_file
     st.success("File uploaded successfully")
 
+####
 # uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
 # lines = None
 # clean_lines = []
