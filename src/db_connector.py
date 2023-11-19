@@ -83,4 +83,8 @@ class DBConnector:
         self.cursor.execute(query, (start_time, end_time))
         data = self.cursor.fetchall()
         return data
-    
+
+if __name__ == "__main__":
+    db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
+    db_conn.connect()
+    print(type(db_conn.query_col('message')))

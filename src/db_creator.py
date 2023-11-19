@@ -52,7 +52,8 @@ class DBCreator:
     def create_db(self, file_name):
         # Connect to SQLite database (it will be created if it doesn't exist)
         db_name = 'logs_' + file_name +'.db'
-        self.conn = sqlite3.connect(db_name)
+        db_path = os.path.join('/home/hackathon26/omar/hackatum23-coinflip/data', db_name)
+        self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
 
         # Create the table
