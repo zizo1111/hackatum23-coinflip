@@ -1,4 +1,6 @@
 import sqlite3
+import pandas as pd
+import numpy as np
 from transformers import pipeline
 
 class DBConnector:
@@ -99,6 +101,27 @@ class DBConnector:
         else:
             sequence = "I have a log file. It has different fields in each line like timestamp and category of message. I am going to ask questions about this file. Please tell me what category the question refers to. The question is :"+ query + "?. What are the types of categories referred to in this query?"
         return self.classifier(sequence,candidate_labels)['labels'][:1]
+    
+    def get_class_hist(self,filter_type,table_name='logs'):
+
+        create_query = "SELECT "
+        for i in range(len(filter_type)):
+            create_query+=f"SUM("+filter_type[i]+")"
+            if(i<len(filter_type)-1):
+                create_query+=','
+        create_query+=f" FROM {table_name} GROUP BY keep_flag;"
+        # print(create_query)
+        self.cursor.execute(create_query) 
+        text_data = self.cursor.fetchall()[1]
+        # df = pd.DataFrame({'Class':filter_type,'Occurences':list(text_data)})
+
+        return pd.DataFrame({'Class':filter_type,'Occurences':list(text_data)})
+    
+    def get_resource_hist(self,class_label,table_name='logs'):
+
+        self.cursor.execute(f"SELECT SUM({class_label})as sum,resource FROM {table_name} GROUP BY resource ORDER BY sum desc;")
+        output = self.cursor.fetchall()
+        return pd.DataFrame(columns=[class_label,'Devices'],data=np.array(output))
 
 if __name__ == "__main__":
     db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
