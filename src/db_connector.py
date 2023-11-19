@@ -17,7 +17,7 @@ class DBConnector:
 
     def connect(self):
         # Connect to the logs.db file
-        self.connection = sqlite3.connect("logs.db")
+        self.connection = sqlite3.connect(self.path)
 
         # Create a cursor object
         self.cursor =self.connection.cursor()
@@ -36,7 +36,7 @@ class DBConnector:
 
         return tables
 
-    def get_columns_names(self, table_name):
+    def get_columns_names(self, table_name='logs'):
         # Execute a query to get the names of all columns in the table
         self.cursor.execute(f"PRAGMA table_info({table_name});")
 
@@ -65,4 +65,22 @@ class DBConnector:
 
         return cols
 
+
+    def get_data_in_time_range(self, start_time, end_time, table_name='logs'):
+        """
+        Query the database for entries within the specified time range.
+        
+        :param db_path: Path to the SQLite database.
+        :param start_time: Start of the time range.
+        :param end_time: End of the time range.
+        :return: List of tuples with the queried data.
+        """
+        print(start_time, end_time)
+        query = f"""
+        SELECT ROWID,message FROM {table_name}
+        WHERE timestamp BETWEEN ? AND ?
+        """
+        self.cursor.execute(query, (start_time, end_time))
+        data = self.cursor.fetchall()
+        return data
     
