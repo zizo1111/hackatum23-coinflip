@@ -20,11 +20,7 @@ with st.spinner("Initilaizing in-memory Qdrant vector database for the session")
     st.session_state["model"] = qdrantt.model
     st.session_state["qdrant"] = qdrantt
     db_cr = db_creator.DBCreator()
-    db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/test_log1.out')
-    db_conn = db_connector.DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
-    db_conn.connect()
-    st.session_state["db_connector"] = db_conn
-    st.session_state["messages"] = db_conn.query_col('message')
+
 
 st.sidebar.success("Database and model loaded in memory")
 st.write("Qdrant Database initiliaized in memory")
@@ -33,6 +29,12 @@ uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
 
 if uploaded_file is not None and "file" not in st.session_state:
     st.session_state["file"] = uploaded_file
+    print(uploaded_file.name)
+    db_path = db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/'+uploaded_file.name )
+    db_conn = db_connector.DBConnector(db_path)
+    db_conn.connect()
+    st.session_state["db_connector"] = db_conn
+    st.session_state["messages"] = db_conn.query_col('message')
     st.success("File uploaded successfully")
 
 ####

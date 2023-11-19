@@ -9,9 +9,9 @@ class DBCreator:
         self.conn=None
         self.flag_text = flag_text
 
-    def __del__(self):
-        if self.conn:
-            self.conn.close()
+    # def __del__(self):
+    #     if self.conn:
+    #         self.conn.close()
     
     def parse_line(self, line,flag_text=""):
         error_cls = False
@@ -49,10 +49,13 @@ class DBCreator:
         return ts,rsc,msg,error_cls,warning_cls,ssh_cls,other_cls,keep_flag
 
 
-    def create_db(self, file_name):
+    def create_db(self, file_path):
+
+        # get file name
+        head, tail = os.path.split(file_path)
         # Connect to SQLite database (it will be created if it doesn't exist)
-        db_name = 'logs_' + file_name +'.db'
-        db_path = os.path.join('/home/hackathon26/omar/hackatum23-coinflip/data', db_name)
+        db_name = 'logs_' + tail +'.db'
+        db_path = os.path.join(head, db_name)
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
 
@@ -69,6 +72,7 @@ class DBCreator:
                 keep_flag BOOLEAN
             )
         ''')
+        return db_path
     # # Function to parse a log line
     # def parse_log_line(self, line):
     #     match = re.match(r'(\w+\s\d+\s\d+:\d+:\d+)\s([\w\-]+)\s([\w\-]+):\s(.+)', line)
@@ -80,11 +84,9 @@ class DBCreator:
     #     return None
     
     def run(self, file_path):
-        # get file name
-        head, tail = os.path.split(file_path)
 
         # Read and parse the log file
-        self.create_db(tail)
+        db_path = self.create_db(file_path)
         line_ctr = 0
         with open(file_path, 'r') as file:
             for line in file:
@@ -97,6 +99,7 @@ class DBCreator:
                     self.cursor.execute('INSERT INTO logs (timestamp, resource, message, error_cls,warning_cls,ssh_cls,other_cls,keep_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', parsed_line)
         print(line_ctr)
         self.conn.commit()
+        return db_path
 
 if __name__ == "__main__":
     db_cr = DBCreator()

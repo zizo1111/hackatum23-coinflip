@@ -1,19 +1,17 @@
 import sqlite3
-from datetime import datetime
-import re
-import os
-import pandas as pd
+from transformers import pipeline
 
 class DBConnector:
 
     def __init__(self, file_path) -> None:
         self.path=file_path
         self.connection=None
+        self.classifier = pipeline("zero-shot-classification")
 
 
-    def __del__(self):
-        if self.connection:
-            self.connection.close()
+    # def __del__(self):
+    #     if self.connection:
+    #         self.connection.close()
 
     def connect(self):
         # Connect to the logs.db file
@@ -83,6 +81,24 @@ class DBConnector:
         self.cursor.execute(query, (start_time, end_time))
         data = self.cursor.fetchall()
         return data
+
+
+    def get_db_labels(self, query, context=None):
+    
+        label_to_column_map = {'all':['ssh_cls','error_cls','warning_cls'],
+                                'ssh':['ssh_cls'],
+                                'error':['error_cls'],
+                                'warning':['warning_cls'],
+                            'ssh or error':['ssh_cls','error_cls'],
+                            'ssh or warning':['ssh_cls','warning_cls'],
+                            'error or warning':['error_cls','warning_cls']
+                            }
+        candidate_labels = list(label_to_column_map.keys())
+        if(context):
+            sequence = "I have a log file. It has different fields in each line like timestamp and category of message. I am going to ask questions about this file. Please tell me what category the question refers to. The previous context was : "+ context + "The question is :"+ query + "?. What are the types of categories referred to in this query?"
+        else:
+            sequence = "I have a log file. It has different fields in each line like timestamp and category of message. I am going to ask questions about this file. Please tell me what category the question refers to. The question is :"+ query + "?. What are the types of categories referred to in this query?"
+        return self.classifier(sequence,candidate_labels)['labels'][:1]
 
 if __name__ == "__main__":
     db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')

@@ -6,6 +6,8 @@ from streamlit_plotly_events import plotly_events
 # Setting the page layout to wide mode for better visual appeal
 st.set_page_config(layout="wide")
 
+class_res = st.session_state.db_connector.get_db_labels(st.session_state.user_query)
+
 # Sample data
 data = {
     'device_id': ['A', 'A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D'],

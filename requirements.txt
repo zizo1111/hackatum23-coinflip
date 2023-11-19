@@ -7,3 +7,4 @@ jupyter
 torch
 qdrant_client
 sentence_transformers
+streamlit-plotly-events
