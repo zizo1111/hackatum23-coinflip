@@ -1,13 +1,12 @@
 import streamlit as st
-from PIL import Image
 import os
-import time
 import sys
 parent_dir = os.path.dirname(os.path.realpath("src"))
 sys.path.append(parent_dir)
 from src import qdrant
 from src import db_creator
 from src import db_connector
+from pathlib import Path
 
 
 st.title("CoinFlip Log Analyser")
@@ -31,7 +30,10 @@ if uploaded_file is not None and "file" not in st.session_state:
     with st.spinner("Initilaizing SQLite Database"):
         st.session_state["file"] = uploaded_file
         print(uploaded_file.name)
-        db_path = db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/'+uploaded_file.name )
+        r_path = Path.cwd()
+        log_file_path = os.path.join(r_path, 'data', uploaded_file.name)
+        db_path = db_cr.run(log_file_path)
+        # db_path = db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/'+uploaded_file.name )
         db_conn = db_connector.DBConnector(db_path)
         db_conn.connect()
         st.session_state["db_connector"] = db_conn
