@@ -86,7 +86,7 @@ with tab1:
             if "calculated" not in st.session_state:
                 calculate_embeddings(to_encode)
             elif(st.session_state.calculated == False):
-                calculate_embedings(to_encode)
+                calculate_embeddings(to_encode)
             
                 #st.write(res)
 
@@ -144,9 +144,6 @@ def search_hits(query_vector,to_encode):
                 else:
                     st.warning(":red[Line:] " +str(idx) + " :blue[Message:] " +str(lines[idx]).replace("b'", "").replace("\\r","").replace("\\n",""), icon="⚠️")
 
-# Find if there is a similar output
-def find_similar_out(arr, element):
-    SequenceMatcher(None, a, b).ratio()
 
 with tab2:
     res = st.text_area(label = "Enter keywords youre interested in", value = "SSH connection error CMX")
