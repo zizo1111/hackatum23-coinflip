@@ -1,7 +1,9 @@
 # COIN FLIP LOG ANALYZER
 
-Run :
-
+## To run the code :
+```bash
 pip install -r requirements.txt
 
 streamlit run streamlit/Home.py
+```
+
