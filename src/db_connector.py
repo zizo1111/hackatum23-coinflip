@@ -121,7 +121,7 @@ class DBConnector:
 
         self.cursor.execute(f"SELECT SUM({class_label})as sum,resource FROM {table_name} GROUP BY resource ORDER BY sum desc;")
         output = self.cursor.fetchall()
-        return pd.DataFrame(columns=[class_label,'Devices'],data=np.array(output))
+        return pd.DataFrame(columns=[class_label,'Devices'],data=np.array(output)).head(5)
 
 if __name__ == "__main__":
     db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
