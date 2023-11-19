@@ -19,16 +19,14 @@ with st.sidebar:
     st.markdown("## Controls")
     st.markdown("Use the interactive charts to explore device data.")
 
-# # Count occurrences of errors and ssh
-# error_count = df['errors'].sum()
-# ssh_count = df['ssh'].sum()
-
-# # Define colors for each category
-# colors = {'errors': 'blue', 'ssh': 'red'}
+# get classes
+class_list = df['Class'].tolist()
+# Define colors for each category
+colors = {'ssh_cls': 'blue', 'error_cls': 'red', 'warning_cls':'orange'}
 
 # Styling for the first graph
 layout = go.Layout(
-    title='Overview: Counts of Classes',
+    title='Overview: Occurance analysis of messages',
     title_x=0.5,
     xaxis=dict(title='Category'),
     yaxis=dict(title='Count'),
@@ -42,29 +40,20 @@ layout = go.Layout(
 #     go.Bar(name='SSH', x=['SSH'], y=[ssh_count], marker_color=colors['ssh'])
 # ], layout=layout)
 
-# fig = px.histogram(df, x='Class',y='Occurences', title='Histogram')
-fig = go.Figure(data=[go.Histogram(x=df['Class'],y=df['Occurences'])],layout=layout)
-# # Display the plot
-# fig.show()
+# Plotly chart for errors and ssh counts
+data_list = [go.Bar(name=cls, x=[cls], y=[df[df['Class'] == cls]['Occurences'].values[0]], marker_color=colors[cls]) for cls in class_list]
+fig = go.Figure(data=data_list, layout=layout)
 
-# Capturing events from the Plotly chart
-selected_points = plotly_events(fig, key="plot1")
+st.plotly_chart(fig, use_container_width=True)
+# # Capturing events from the Plotly chart 
+# selected_points = plotly_events(fig, key="plot1")
 
-# Check if a bar was clicked and update the session state
-if selected_points:
-    category = "error_cls"
-    point = selected_points[0]
-    if(point['x']=='error_cls'):
-        category = 'error_cls'
-    elif(point['x']=='ssh_cls'):
-        category = 'ssh_cls'
-    else:
-        category = 'warning_cls'
-category = "error_cls"
-df = st.session_state.db_connector.get_resource_hist(category)
-print("df" , df)
-
-fig = go.Figure(data=[go.Histogram(x=df['Devices'],y=df['Class_label'])],layout=layout)
+# # Check if a bar was clicked and update the session state
+# if selected_points:
+#     point = selected_points[0]
+#     category = point['x']
+#     print(st.session_state.db_connector.get_resource_hist(category))
+#     st.session_state.selected_category = category
 
 # # Display the second graph based on the selection
 # if 'selected_category' in st.session_state and st.session_state.selected_category:
