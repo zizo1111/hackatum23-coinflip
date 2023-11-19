@@ -63,7 +63,7 @@ class DBConnector:
         # Fetch all rows
         cols = self.cursor.fetchall()
 
-        return cols
+        return [item[0] for item in cols]
 
 
     def get_data_in_time_range(self, start_time, end_time, table_name='logs'):
@@ -87,4 +87,4 @@ class DBConnector:
 if __name__ == "__main__":
     db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
     db_conn.connect()
-    print(type(db_conn.query_col('message')))
+    print(type(db_conn.query_col('message')[0]),)
