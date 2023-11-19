@@ -56,6 +56,11 @@ class DBCreator:
         # Connect to SQLite database (it will be created if it doesn't exist)
         db_name = 'logs_' + tail +'.db'
         db_path = os.path.join(head, db_name)
+        
+        #delete of exists
+        if os.path.isfile(db_path):
+            os.remove(db_path)
+
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
 
