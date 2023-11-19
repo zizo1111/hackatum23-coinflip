@@ -28,76 +28,17 @@ st.write("Qdrant Database initiliaized in memory")
 uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
 
 if uploaded_file is not None and "file" not in st.session_state:
-    st.session_state["file"] = uploaded_file
-    print(uploaded_file.name)
-    db_path = db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/'+uploaded_file.name )
-    db_conn = db_connector.DBConnector(db_path)
-    db_conn.connect()
-    st.session_state["db_connector"] = db_conn
-    st.session_state["messages"] = db_conn.query_col('message')
-    st.success("File uploaded successfully")
+    with st.spinner("Initilaizing SQLite Database"):
+        st.session_state["file"] = uploaded_file
+        print(uploaded_file.name)
+        db_path = db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/'+uploaded_file.name )
+        db_conn = db_connector.DBConnector(db_path)
+        db_conn.connect()
+        st.session_state["db_connector"] = db_conn
+        messages = db_conn.query_col('message')
+        for idx,message in enumerate(messages):
+            if "Got Data" in message:
+                messages[idx] = ""
 
-####
-# uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
-# lines = None
-# clean_lines = []
-# st.header('Log Analyser')
-
-# tab1, tab2, tab3, tab4 = st.tabs(['File Information', 'Questions and Answers', 'Pre-processing', "Empty containers"])
-
-# tab1.subheader('File Information')
-
-
-
-# with tab1:
-#     sum_chars = 0
-#     clean_chars = 0 
-#     if uploaded_file is not None:  
-#             st.sidebar.success("File uploaded successfully")
-#             name = uploaded_file.name
-#             lines = uploaded_file.readlines()
-#             size = uploaded_file.size
-#             st.write("Filename: ", name)
-#             st.write("File size: ", round(size/ (1024 * 1024),3) ,"MB")
-#             st.write("Number of log entries: " , len(lines))
-#             st.session_state.read_file = True
-#             with st.spinner("Pre-processing file"):
-#                 with st.spinner("Processing file "):
-#                     for line in lines:
-#                         sum_chars += len(line)
-#                         line = line.replace(line.split(b': ',2)[0],b'')
-#                         #print(line)
-#                         clean_chars += len(line)
-#                         clean_lines.append(str(line))
-#                 st.write("Total character sum before processing: ",sum_chars)
-#                 st.write("Total character sum after processing : ",clean_chars)
-#             with st.spinner("Caluclating embedings"):
-#                 embeddings = model.encode(clean_lines)
-
-
-
-# with tab2:
-#     res = st.text_area("Ask your questions here")
-#     if res is not None :
-#         st.write(res)
-
-# tab3.subheader('Pre processing')
-
-# tab4.subheader('Empty containers')
-
-# with tab4:
-#     with st.echo():
-#         st.write("You can create placeholders and empty them when desired")
-#         placeholder = st.empty()
-#         fill_button = st.button("Fill the empty container")
-#         clean_button = st.button("Empty the container")
-#         if fill_button:
-#             placeholder.subheader("We are filling something here")
-#         if clean_button:
-#             placeholder.empty()
-
-#         st.info("This must appear below the container")
-
-
-
-# st.sidebar.success("Select a page above.")
+        st.session_state["messages"] = messages
+        st.success("File uploaded successfully")

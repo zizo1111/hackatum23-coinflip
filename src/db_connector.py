@@ -17,7 +17,7 @@ class DBConnector:
 
     def connect(self):
         # Connect to the logs.db file
-        self.connection = sqlite3.connect(self.path)
+        self.connection = sqlite3.connect(self.path, check_same_thread=False)
 
         # Create a cursor object
         self.cursor =self.connection.cursor()
@@ -100,29 +100,36 @@ class DBConnector:
             sequence = "I have a log file. It has different fields in each line like timestamp and category of message. I am going to ask questions about this file. Please tell me what category the question refers to. The previous context was : "+ context + "The question is :"+ query + "?. What are the types of categories referred to in this query?"
         else:
             sequence = "I have a log file. It has different fields in each line like timestamp and category of message. I am going to ask questions about this file. Please tell me what category the question refers to. The question is :"+ query + "?. What are the types of categories referred to in this query?"
-        return self.classifier(sequence,candidate_labels)['labels'][:1]
+        return label_to_column_map[self.classifier(sequence,candidate_labels)['labels'][0]]
     
     def get_class_hist(self,filter_type,table_name='logs'):
 
         create_query = "SELECT "
         for i in range(len(filter_type)):
+            #print(filter_type[i])
             create_query+=f"SUM("+filter_type[i]+")"
             if(i<len(filter_type)-1):
                 create_query+=','
         create_query+=f" FROM {table_name} GROUP BY keep_flag;"
         # print(create_query)
         self.cursor.execute(create_query) 
-        text_data = self.cursor.fetchall()[1]
+        text_data = list(self.cursor.fetchall()[0])
         # df = pd.DataFrame({'Class':filter_type,'Occurences':list(text_data)})
 
-        return pd.DataFrame({'Class':filter_type,'Occurences':list(text_data)})
+        return pd.DataFrame({'Class':filter_type,'Occurences':text_data})
     
     def get_resource_hist(self,class_label,table_name='logs'):
 
         self.cursor.execute(f"SELECT SUM({class_label})as sum,resource FROM {table_name} GROUP BY resource ORDER BY sum desc;")
         output = self.cursor.fetchall()
-        return pd.DataFrame(columns=[class_label,'Devices'],data=np.array(output)).head(5)
+        return pd.DataFrame(columns=['Class_label','Devices'],data=np.array(output)).head(5)
 
+    def get_data_frame(self, query=None):
+        class_res = ['ssh_cls','error_cls','warning_cls']
+        if query:
+            class_res = self.get_db_labels(query=query)
+        return self.get_class_hist(class_res)
+    
 if __name__ == "__main__":
     db_conn = DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
     db_conn.connect()

@@ -8,3 +8,4 @@ torch
 qdrant_client
 sentence_transformers
 streamlit-plotly-events
+openai==0.28

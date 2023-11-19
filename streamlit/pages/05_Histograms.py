@@ -52,6 +52,7 @@ selected_points = plotly_events(fig, key="plot1")
 
 # Check if a bar was clicked and update the session state
 if selected_points:
+    category = "error_cls"
     point = selected_points[0]
     if(point['x']=='error_cls'):
         category = 'error_cls'
@@ -59,7 +60,9 @@ if selected_points:
         category = 'ssh_cls'
     else:
         category = 'warning_cls'
+category = "error_cls"
 df = st.session_state.db_connector.get_resource_hist(category)
+print("df" , df)
 
 fig = go.Figure(data=[go.Histogram(x=df['Devices'],y=df['Class_label'])],layout=layout)
 

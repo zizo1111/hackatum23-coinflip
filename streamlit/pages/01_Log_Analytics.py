@@ -4,13 +4,14 @@ import time
 st.set_page_config(page_title="Log Analyser", page_icon="👋", layout='wide')
 from difflib import SequenceMatcher
 import pandas as pd
+import openai
 
 if "file" not in st.session_state:
     st.error("Upload a file before proceeding")
 #uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
 
 num_of_lines_to_embedd = st.slider("Lines to Embedd", min_value=500, max_value=70000, value=1000, step=100)
-num_of_chunks = st.slider("Lines to Embedd", min_value=10, max_value=1000, value=20, step=10)
+num_of_chunks = st.slider("Lines to Embedd", min_value=10, max_value=1000, value=100, step=10)
 
 lines = []
 clean_lines = []
@@ -42,39 +43,7 @@ def calculate_embeddings(to_encode, collection_name):
         st.session_state["calculated"] = True
 
 with tab1:
-    # sum_chars = 0
-    # clean_chars = 0 
-    # to_encode = []
-    # if "file" in st.session_state:
-    #         uploaded_file = st.session_state.file 
-    #         name = uploaded_file.name
-    #         lines = uploaded_file.readlines()
-    #         st.session_state["lines"] = lines
-    #         size = uploaded_file.size
-    #         st.write("Filename: ", name)
-    #         st.write("File size: ", round(size/ (1024 * 1024),3) ,"MB")
-    #         st.write("Number of log entries: " , len(lines))
-    #         st.session_state.read_file = True
-    #         with st.spinner("Pre-processing file"):
-    #             with st.spinner("Removing unnecesary characters"):
-    #                 for line in st.session_state.lines:
-    #                     sum_chars += len(line)
-    #                     #if "Got Data" not in str(line):
-                            
-    #                     line = line.replace(line.split(b': ',2)[0],b'')
-    #                     #print(line)
-    #                     clean_chars += len(line)
-    #                     end_line = str(line).replace("b'", "").replace("\\r","").replace("\\n","").replace(": ","")
-    #                     clean_lines.append(str(end_line))
 
-    #             st.write("Total character sum before processing: ",sum_chars)
-    #             st.write("Total character sum after processing : ",clean_chars)
-    #             st.write("Total line sum before processing: ",len(lines))
-    #             st.write("Total line sum after processing : ",len(clean_lines))
-
-        # for i in range(0,num_of_lines_to_embedd, num_of_chunks):
-        #     to_encode.append(" ;;; ".join(st.session_state.messages[i:i+num_of_chunks]))
-            
         if "calculated" not in st.session_state:
             calculate_embeddings(st.session_state.messages, "my_collection")
         elif(st.session_state.calculated == False):
@@ -107,9 +76,11 @@ def search_vector(query_vector, hit):
         return hits
 
 # Main search from all for hits
-def search_hits(collection_name, query_vector):
+def search_hits(collection_name, query_vector,query):
+        openai.api_key = "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"
         hits = st.session_state.qdrant.search_collection(collection_name, query_vector, 5)
-
+        top_logs = []
+        log_str  = ""
 
         for hit in hits:
             st.header("Highest vector similiarity in lines: " + str(hit.id * num_of_chunks)+"-"+str(hit.id * num_of_chunks +num_of_chunks) + " with score " + str(hit.score))
@@ -117,12 +88,23 @@ def search_hits(collection_name, query_vector):
 
             hits_0 = st.session_state.qdrant.search_vector(query_vector, hit,st.session_state.messages)
             for hit_ in hits_0:
-                idx = hit_.payload["line_id"] + hit.id*num_of_chunks
+                idx = hit_.id + hit.id*num_of_chunks
+                top_logs.append(st.session_state.messages[idx])
                 if hit_.score < 0.5:
                     st.write(":red[Line:] " +str(idx) + " :blue[Message:] " +str(st.session_state.messages[idx]).replace("b'", "").replace("\\r","").replace("\\n",""))
                 else:
                     st.warning(":red[Line:] " +str(idx) + " :blue[Message:] " +str(st.session_state.messages[idx]).replace("b'", "").replace("\\r","").replace("\\n",""), icon="⚠️")
-        st.write(hits)
+        
+            log_str += " | ".join(top_logs)
+                    
+        response = openai.Completion.create(
+            engine = "text-davinci-003",
+            prompt = query + " LOGS : " + log_str,
+            temperature = 0.6,
+            max_tokens = 512,
+        )
+        st.write(response.choices[0]["text"])
+        #st.write(hits)
 
         # hits_0 = search_vector(query_vector, hit)
         # for hit in hits_0:
@@ -138,4 +120,4 @@ with tab2:
     st.session_state['user_query'] = res
     query_vector = st.session_state.model.encode(res.replace("log",""))
     if "embeddings" in st.session_state:
-        search_hits("my_collection", query_vector)
+        search_hits("my_collection", query_vector,res)

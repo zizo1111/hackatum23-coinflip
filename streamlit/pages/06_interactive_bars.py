@@ -19,16 +19,14 @@ with st.sidebar:
     st.markdown("## Controls")
     st.markdown("Use the interactive charts to explore device data.")
 
-# Count occurrences of errors and ssh
-error_count = df['errors'].sum()
-ssh_count = df['ssh'].sum()
-
+# get classes
+class_list = df['Class'].tolist()
 # Define colors for each category
-colors = {'errors': 'blue', 'ssh': 'red'}
+colors = {'ssh_cls': 'blue', 'error_cls': 'red', 'warning_cls':'orange'}
 
 # Styling for the first graph
 layout = go.Layout(
-    title='Overview: Counts of Errors and SSH',
+    title='Overview: Occurance analysis of messages',
     title_x=0.5,
     xaxis=dict(title='Category'),
     yaxis=dict(title='Count'),
@@ -36,40 +34,44 @@ layout = go.Layout(
     plot_bgcolor='rgba(0,0,0,0)'
 )
 
-# Plotly chart for errors and ssh counts
-fig = go.Figure(data=[
-    go.Bar(name='Errors', x=['Errors'], y=[error_count], marker_color=colors['errors']),
-    go.Bar(name='SSH', x=['SSH'], y=[ssh_count], marker_color=colors['ssh'])
-], layout=layout)
+# # Plotly chart for errors and ssh counts
+# fig = go.Figure(data=[
+#     go.Bar(name='Errors', x=['Errors'], y=[error_count], marker_color=colors['errors']),
+#     go.Bar(name='SSH', x=['SSH'], y=[ssh_count], marker_color=colors['ssh'])
+# ], layout=layout)
 
-# Capturing events from the Plotly chart
+# Plotly chart for errors and ssh counts
+data_list = [go.Bar(name=cls, x=[cls], y=[df[df['Class'] == cls]['Occurences'].values[0]], marker_color=colors[cls]) for cls in class_list]
+fig = go.Figure(data=data_list, layout=layout)
+
+# Capturing events from the Plotly chart 
 selected_points = plotly_events(fig, key="plot1")
 
-# Check if a bar was clicked and update the session state
-if selected_points:
-    point = selected_points[0]
-    category = 'errors' if point['x'] == 'Errors' else 'ssh'
-    st.session_state.selected_category = category
+# # Check if a bar was clicked and update the session state
+# if selected_points:
+#     point = selected_points[0]
+#     category = 'errors' if point['x'] == 'Errors' else 'ssh'
+#     st.session_state.selected_category = category
 
-# Display the second graph based on the selection
-if 'selected_category' in st.session_state and st.session_state.selected_category:
-    category = st.session_state.selected_category
-    filtered_data = df[df[category] == True]
-    count_by_device = filtered_data['device_id'].value_counts().reset_index()
-    count_by_device.columns = ['device_id', 'count']
+# # Display the second graph based on the selection
+# if 'selected_category' in st.session_state and st.session_state.selected_category:
+#     category = st.session_state.selected_category
+#     filtered_data = df[df[category] == True]
+#     count_by_device = filtered_data['device_id'].value_counts().reset_index()
+#     count_by_device.columns = ['device_id', 'count']
 
-    # Styling for the second graph
-    layout2 = go.Layout(
-        title=f'{category.capitalize()} Count by Device ID',
-        title_x=0.5,
-        xaxis=dict(title='Device ID'),
-        yaxis=dict(title='Count'),
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
+#     # Styling for the second graph
+#     layout2 = go.Layout(
+#         title=f'{category.capitalize()} Count by Device ID',
+#         title_x=0.5,
+#         xaxis=dict(title='Device ID'),
+#         yaxis=dict(title='Count'),
+#         plot_bgcolor='rgba(0,0,0,0)'
+#     )
 
-    fig2 = go.Figure(data=[
-        go.Bar(x=count_by_device['device_id'], y=count_by_device['count'], 
-               marker_color=colors[category])
-    ], layout=layout2)
+#     fig2 = go.Figure(data=[
+#         go.Bar(x=count_by_device['device_id'], y=count_by_device['count'], 
+#                marker_color=colors[category])
+#     ], layout=layout2)
 
-    st.plotly_chart(fig2, use_container_width=True)
+#     st.plotly_chart(fig2, use_container_width=True)
