@@ -13,7 +13,7 @@ class DBCreator:
         if self.conn:
             self.conn.close()
     
-    def parse_line(self, line):
+    def parse_line(self, line,flag_text=""):
         error_cls = False
         warning_cls = False
         perm_cls =False
@@ -24,6 +24,12 @@ class DBCreator:
         line = line.lower()
         # print(line)
         ts,rsc = line[:16].strip(),line[16:].split(':')[0]
+        current_year = datetime.now().year
+        date_string_with_year = f"{current_year} {ts}"
+
+        # Convert the string to a datetime object
+        ts = datetime.strptime(date_string_with_year, "%Y %b %d %H:%M:%S")
+        # print(date_object)
         msg_idx = line[16:].index(':')
         msg = line[16:][msg_idx+1:].strip()
         if('error' in msg):
@@ -37,7 +43,7 @@ class DBCreator:
         if('ssh' in msg):
             ssh_cls = True
             other_cls = False
-        if(self.flag_text and self.flag_text in msg):
+        if(flag_text and flag_text in msg):
             keep_flag = False
         
         return ts,rsc,msg,error_cls,warning_cls,ssh_cls,other_cls,keep_flag

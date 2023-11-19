@@ -118,7 +118,7 @@ class Summarizer:
         )
 
         # Get the output from the model
-        outputs = self.model(**inputs)
+        outputs = self.model_vec(**inputs)
 
         # Get the embeddings from the last hidden state
         embeddings = outputs.last_hidden_state
@@ -132,7 +132,7 @@ class Summarizer:
         return vector
 
 
-    def calculate_similarity(question_vector, answer_vector):
+    def calculate_similarity(self, question_vector, answer_vector):
         """Calculate the cosine similarity between the question and answer vectors.
         
         param question_vector: This is the vector representation of the question. 
@@ -155,7 +155,7 @@ class Summarizer:
         return similarity
 
 
-    def find_best_answer(self, context, question, model_vec, num_answers=3, overlap=50, max_length=512):
+    def find_best_answer(self, context, question, num_answers=3, overlap=50, max_length=512):
         """Find the best answers to the question given a long context
         param model: This is the model that you're using to generate answers to the questions. 
         It could be any model that's capable of question answering, such as a transformer model.
@@ -187,7 +187,7 @@ class Summarizer:
             
         """
         # Vectorize the question
-        question_vector = self.vectorize_text(model_vec, self.tokenizer, question)
+        question_vector = self.vectorize_text(question)
         
         # Initialize the best answers and their similarities to the question
         best_answers = [(None, -1) for _ in range(num_answers)]
@@ -197,9 +197,9 @@ class Summarizer:
         
         # Generate an answer for each chunk and update the best answers if necessary
         for chunk in chunks:
-            answer = self.answer_question(self.model, self.tokenizer, chunk, question)
+            answer = self.answer_question(chunk, question)
             if answer is not None:
-                answer_vector = self.vectorize_text(model_vec, self.tokenizer, answer)
+                answer_vector = self.vectorize_text(answer)
                 if answer_vector is not None:
                     similarity = self.calculate_similarity(question_vector, answer_vector)
                     # Check if the similarity is higher than the current lowest in best_answers
@@ -221,23 +221,19 @@ class Summarizer:
     def run(self, input_file):
         # Ask the user for input
         user_input = input("Enter your question: ")
-        log_file = self.parse_file(input_file)
-        # log_file = """
-        #         INFO - 2022-01-01 00:00:01,234 - Connection established.
-        #         INFO - 2022-01-01 00:00:02,345 - Sending request to server.
-        #         ERROR - 2022-01-01 00:00:03,456 - Failed to establish a new connection: [Errno 11001] getaddrinfo failed.
-        #         INFO - 2022-01-01 00:00:04,567 - Connection closed.
-        #         INFO - 2022-01-01 00:00:05,678 - Attempting to reconnect.
-        #         INFO - 2022-01-01 00:00:06,789 - Connection established.
-        #         INFO - 2022-01-01 00:00:07,890 - Sending request to server.
-        #         INFO - 2022-01-01 00:00:08,901 - Server response received.
-        #         INFO - 2022-01-01 00:00:09,012 - Processing server response.
-        #         ERROR - 2022-01-01 00:00:10,123 - Error while processing server response: Unexpected token.
-        #         INFO - 2022-01-01 00:00:11,234 - Connection closed.
-        #         """
+        # log_file = self.parse_file(input_file)
+        log_file = """
+                "Nov 09 13:11:44 CMX50070-101776 Xserver[2286]: libGL error: MESA-LOADER: failed to open radeonsi: /usr/lib/dri/radeonsi_dri.so: cannot open shared object file: No such file or directory (search paths /usr/lib/dri, suffix _dri)
+                Nov 09 13:11:44 CMX50070-101776 Xserver[2286]: libGL error: failed to load driver: radeonsi
+                Nov 09 13:11:44 CMX50070-101776 kernel: CMX_AU_IOCTL_SET_CLEAR_SIG_FPGA call
+                Nov 09 13:11:44 CMX50070-101776 kernel: CMX_IOCTL_GET_SLOT_ID call
+                Nov 09 13:11:44 CMX50070-101776 Xserver[2286]: libGL error: failed to open /dev/dri/card0: No such file or directory
+                Nov 09 13:11:44 CMX50070-101776 Xserver[2286]: libGL error: failed to load driver: radeonsi"
+                """
+        # best_answer = self.find_best_answer(log_file, user_input)
         best_answer = self.answer_question(log_file, user_input)
         print(f"The best answer is: {best_answer}")
 
 if __name__ == "__main__":
-    summarizer = Summarizer("bert-large-uncased-whole-word-masking-finetuned-squad")
+    summarizer = Summarizer("facebook/bart-large-cnn")
     summarizer.run('/home/hackathon26/omar/hackatum23-coinflip/data/test_log1.out')
