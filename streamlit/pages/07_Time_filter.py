@@ -4,10 +4,6 @@ from datetime import datetime
 # Streamlit page configuration
 st.set_page_config(page_title="Time Range Data Viewer", layout="wide")
 
-# Database path
-DB_PATH = "/home/hackathon26/omar/hackatum23-coinflip/src/logs_test_log1.out.db"
-db_connector = DBConnector(DB_PATH)
-db_connector.connect()
 
 # Streamlit app layout
 st.title("Database Viewer")
@@ -56,7 +52,7 @@ if submit_button:
             st.error("End datetime must be after start datetime.")
         else:
             try:
-                data = db_connector.get_data_in_time_range(start_datetime, end_datetime)
+                data = st.session_state.db_connector.get_data_in_time_range(start_datetime, end_datetime)
                 if data:
                     st.markdown('## Query Results')
                     for row in data:
