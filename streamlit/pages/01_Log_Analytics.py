@@ -9,24 +9,24 @@ if "file" not in st.session_state:
     st.error("Upload a file before proceeding")
 #uploaded_file = st.file_uploader("Upload your Log file",type=['.txt',".out"])
 
-num_of_lines_to_embedd = st.slider("Lines to Embedd", min_value=500, max_value=70000, value=1000, step=100)
-num_of_chunks = st.slider("Lines to Embedd", min_value=10, max_value=1000, value=20, step=10)
+num_of_lines_to_embedd = 2000 #st.slider("Lines to Embedd", min_value=500, max_value=70000, value=1000, step=100)
+num_of_chunks = 100 # st.slider("Lines to Embedd", min_value=10, max_value=1000, value=20, step=10)
 
 lines = []
 clean_lines = []
 st.header('Log Analyser')
 more_embed = []
 
-if "model" not in st.session_state or "client not in st.session_state":
-    with st.spinner("Initilaizing in-memory Qdrant vector database for the session"):
-        from sentence_transformers import SentenceTransformer
-        from qdrant_client import QdrantClient, models
-        from qdrant_client.models import PointStruct
-        client  = QdrantClient(":memory:")
-        client.create_collection("my_collection", vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )#COSINE;DOT;EUCLIDEAN
-        client.create_collection("second_coll", vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )
-        st.session_state["client"] = client
-        st.session_state["model"] = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+# if "model" not in st.session_state or "client not in st.session_state":
+#     with st.spinner("Initilaizing in-memory Qdrant vector database for the session"):
+#         from sentence_transformers import SentenceTransformer
+#         from qdrant_client import QdrantClient, models
+#         from qdrant_client.models import PointStruct
+#         client  = QdrantClient(":memory:")
+#         client.create_collection("my_collection", vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )#COSINE;DOT;EUCLIDEAN
+#         client.create_collection("second_coll", vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )
+#         st.session_state["client"] = client
+#         st.session_state["model"] = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 tab1, tab2= st.tabs(['File Information', 'Log Explorer'])
 
@@ -40,11 +40,12 @@ def calc_embed(inhalt):
         return more_embed
         #st.write("Finished embeddings in " ,end-start)
 
-#Calculates Embeddings for all
+# #Calculates Embeddings for all
 def calculate_embeddings(to_encode):
     with st.spinner("Calculating embeddings, please wait before proceeding"):
         start = time.time()
-        st.session_state["embeddings"] = st.session_state.model.encode(to_encode)
+        st.session_state.qdrant.calculate_embeddings(st.session_state.messages)
+        # st.session_state["embeddings"] = st.session_state.model.encode(to_encode)
         end = time.time()
         st.write("Finished embeddings in " ,end-start)
         st.session_state["calculated"] = True
@@ -80,9 +81,9 @@ with tab1:
                 st.write("Total line sum before processing: ",len(lines))
                 st.write("Total line sum after processing : ",len(clean_lines))
 
-                
                 for i in range(0,num_of_lines_to_embedd, num_of_chunks):
                     to_encode.append(" ;;; ".join(clean_lines[i:i+num_of_chunks]))
+            
             if "calculated" not in st.session_state:
                 calculate_embeddings(to_encode)
             elif(st.session_state.calculated == False):
@@ -114,24 +115,29 @@ def search_vector(query_vector,hit):
         )
         return hits
 
-def search_hits(query_vector,to_encode):
-        st.session_state.client.upsert(
-                    collection_name="my_collection",
-            points=[
-                PointStruct(
-                        id=idx,
-                        vector=vector.tolist(),
-                        payload={"Inhalt": to_encode[idx]}
-                )
-            for idx, vector in enumerate(st.session_state.embeddings)
-        ]
-        )
-        hits = st.session_state.client.search(
-            collection_name="my_collection",
-            query_vector=query_vector,
-            limit=5  # Return 5 closest points
-            )
-        print(hits[0].id)
+# Main search from all for hits
+def search_hits(query_vector,collection_name,embeddings):
+        st.session_state.qdrant.populate_qdrant(collection_name,embeddings)
+        hits = st.session_state.qdrant.search_collection(collection_name,query_vector)
+
+        # st.session_state.client.upsert(
+        #             collection_name="my_collection",
+        #     points=[
+        #         PointStruct(
+        #                 id=idx,
+        #                 vector=vector.tolist(),
+        #                 payload={"Inhalt": to_encode[idx]}
+        #         )
+        #     for idx, vector in enumerate(st.session_state.embeddings)
+        # ]
+        # )
+
+        # hits = st.session_state.client.search(
+        #     collection_name="my_collection",
+        #     query_vector=query_vector,
+        #     limit=5  # Return 5 closest points
+        #     )
+        # print(hits[0].id)
 
         for hit in hits:
             st.header("Highest vector similiarity in lines: " + str(hit.id * num_of_chunks)+"-"+str(hit.id * num_of_chunks +num_of_chunks) + " with score " + str(hit.score))

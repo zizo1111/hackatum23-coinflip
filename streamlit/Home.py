@@ -6,6 +6,8 @@ import sys
 parent_dir = os.path.dirname(os.path.realpath("src"))
 sys.path.append(parent_dir)
 from src import qdrant
+from src import db_creator
+from src import db_connector
 
 
 st.title("CoinFlip Log Analyser")
@@ -16,6 +18,13 @@ with st.spinner("Initilaizing in-memory Qdrant vector database for the session")
     qdrantt = qdrant.Qdrant()
     st.session_state["client"] = qdrantt.client
     st.session_state["model"] = qdrantt.model
+    st.session_state["qdrant"] = qdrantt
+    db_cr = db_creator.DBCreator()
+    db_cr.run('/home/hackathon26/omar/hackatum23-coinflip/data/test_log1.out')
+    db_conn = db_connector.DBConnector('/home/hackathon26/omar/hackatum23-coinflip/data/logs_test_log1.out.db')
+    db_conn.connect()
+    st.session_state["db_connector"] = db_conn
+    st.session_state["messages"] = db_conn.query_col('message')
 
 st.sidebar.success("Database and model loaded in memory")
 st.write("Qdrant Database initiliaized in memory")

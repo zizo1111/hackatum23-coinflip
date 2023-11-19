@@ -1,17 +1,18 @@
+
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient, models
 from qdrant_client.models import PointStruct
 
-class Qdrant:
+class Qdrant():
+    def __init__(self):
+         self.client  = QdrantClient(":memory:")
+         self.create_collection("my_collection")
+         self.create_collection("second_coll")
+         self.model =SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    def __init__(self) -> None:
-        self.client  = QdrantClient(":memory:")
-        self.create_collection("my_collection")
-        self.create_collection("second_coll")        
-        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    def create_collection(self, name):
-         self.client.create_collection(name, vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE) )
+    def create_collection(self,name):
+        self.client.create_collection(name, vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE))
 
 
     def calculate_embeddings(self,to_encode):
@@ -21,7 +22,7 @@ class Qdrant:
         embeddings = self.model.encode(to_encode)
         return embeddings
     
-    def populate_qdrant(self, collection_name, embeddings,data):
+    def populate_qdrant(self, collection_name, embeddings):
         """
         This method populates a qdrant collection
         it recieves a collection_name
@@ -33,7 +34,7 @@ class Qdrant:
                 PointStruct(
                         id=idx,
                         vector=vector.tolist(),
-                        payload={"line_id": idx}
+                        payload={"line_id": idx} # chunk idW
                 )
             for idx, vector in enumerate(embeddings)
         ]
